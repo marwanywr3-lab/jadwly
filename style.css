@@ -383,28 +383,41 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  overflow: hidden;
+  overflow: clip; /* clip يحافظ على الزوايا الدائرية بدون تعطيل sticky على الجوال */
 }
 
 .table-scroll {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+  isolation: isolate;
 }
 
 .schedule-table {
   width: 100%;
   min-width: 1080px;
-  border-collapse: collapse;
+  border-collapse: separate; /* ضروري لعمل sticky بثبات تام على الجوال */
+  border-spacing: 0;
   table-layout: fixed;
 }
 
 .schedule-table th,
 .schedule-table td {
-  border: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   padding: 14px 10px;
   text-align: center;
   vertical-align: middle;
+}
+
+.schedule-table th:first-child,
+.schedule-table td:first-child {
+  border-right: none;
+}
+
+.schedule-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .schedule-table thead th {
@@ -414,14 +427,20 @@ body {
   padding: 16px 8px;
 }
 
+/* خلية الزاوية العلوية اليمنى (ثابتة دائماً) */
 .corner-cell {
   width: 112px;
+  min-width: 112px;
+  max-width: 112px;
   background: var(--bg-header) !important;
   color: var(--text-on-header) !important;
   font-size: 0.9rem;
+  position: -webkit-sticky;
   position: sticky;
   right: 0;
-  z-index: 10;
+  inset-inline-start: 0;
+  z-index: 30;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.25);
 }
 
 .th-period {
@@ -437,16 +456,22 @@ body {
   white-space: nowrap;
 }
 
-/* عمود الأيام المثبت يميناً (طبقة عليا صلبة تمنع أي تداخل) */
+/* شريط الأيام المثبت في مكانه مهما حركت الجدول يميناً أو يساراً */
 .day-cell {
-  background: var(--bg-subtle);
+  width: 112px;
+  min-width: 112px;
+  max-width: 112px;
+  background-color: var(--bg-subtle);
   color: var(--text-primary);
   font-weight: 800;
   font-size: 0.98rem;
+  position: -webkit-sticky;
   position: sticky;
   right: 0;
-  z-index: 8;
-  box-shadow: -3px 0 8px rgba(0, 0, 0, 0.14);
+  inset-inline-start: 0;
+  z-index: 20;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.18);
+  transform: translateZ(0);
 }
 
 .today-row {
@@ -454,7 +479,7 @@ body {
 }
 
 .today-row .day-cell {
-  background: var(--accent-soft);
+  background-color: var(--accent-soft);
   color: var(--accent-text);
   border-right: 4px solid var(--accent);
 }
@@ -468,9 +493,14 @@ body {
 
 /* خلايا الحصص */
 .lesson-cell {
+  background-color: var(--bg-surface);
   transition: background-color 0.2s ease;
   position: relative;
   z-index: 1;
+}
+
+.today-row .lesson-cell {
+  background-color: var(--today-row-bg);
 }
 
 .lesson-subject {
@@ -504,20 +534,22 @@ body {
 .empty-cell {
   color: var(--text-muted);
   font-size: 0.85rem;
-  background: repeating-linear-gradient(
+  background-color: var(--bg-surface);
+  background-image: repeating-linear-gradient(
     -45deg,
     transparent,
     transparent 8px,
     rgba(11, 25, 44, 0.02) 8px,
     rgba(11, 25, 44, 0.02) 16px
   );
+  position: relative;
+  z-index: 1;
 }
 
 /* تمييز الحصة الحالية والقادمة داخل الجدول */
 .lesson-cell.active-now {
   background: var(--live-bg) !important;
-  box-shadow: inset 0 0 0 3px var(--live-border), 0 4px 14px rgba(11, 25, 44, 0.16);
-  position: relative;
+  box-shadow: inset 0 0 0 3px var(--live-border);
   z-index: 2;
 }
 
